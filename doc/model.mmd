@@ -1,0 +1,63 @@
+classDiagram
+    direction LR
+    namespace Агрегат_Сигнал_SOS {
+        class DistressCall {
+            <<Сущность, корень агрегата>>
+            -int _number
+            -string _ship
+            -Position _position
+            -SignalStatus _status
+            -vector~Rescuer~ _rescuers
+            +assignRescuers(rescuers) bool
+            +close() bool
+            +invariant() bool
+        }
+        class Rescuer {
+            <<Объект-значение>>
+            +string ship
+            +double distance
+        }
+        class Position {
+            <<Объект-значение>>
+            -int _x
+            -int _y
+            +distanceTo(other) double
+            +toString() string
+        }
+    }
+    class Ship {
+        <<Сущность>>
+        -string _name
+        -int _dryTonnage
+        -int _fullTonnage
+        -ShipType _type
+        -Position _position
+    }
+    class SignalLog {
+        +addSignal(signal) bool
+        +findSignal(number) DistressCall или nullptr
+        +findActiveSignal(ship) DistressCall или nullptr
+    }
+    class ShipRegistry {
+        +findShip(name) Ship или nullptr
+        +getShips() map
+    }
+    class findNearestShips {
+        <<Служба>>
+        findNearestShips(registry, position, excluded, count) vector~Rescuer~
+    }
+    class assignRescuers {
+        <<Служба>>
+        assignRescuers(signal, registry, signals) string
+    }
+    DistressCall *-- "1" Position : место бедствия
+    DistressCall *-- "0..3" Rescuer
+    DistressCall ..> Ship : по наименованию
+    Rescuer ..> Ship : по наименованию
+    Ship *-- "0..1" Position
+    SignalLog o-- "0..*" DistressCall
+    ShipRegistry o-- "0..*" Ship
+    assignRescuers ..> DistressCall
+    assignRescuers ..> SignalLog
+    assignRescuers ..> findNearestShips
+    findNearestShips ..> ShipRegistry
